@@ -19,7 +19,7 @@
 			{
 				"name": "keyword.move",
 				"match": "<|>"
-			}
+			},
 			{
 				"name": "keyword.io",
 				"match": ".|,"
