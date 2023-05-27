@@ -8,22 +8,22 @@
 	],
 	"repository": {
 		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.bfp",
-				"match": "\\[|\\]"
+			"patterns": [
+			{
+				"name": "keyword.operator.bfp",
+				"match": "[\\+-]"
 			},
 			{
-				"name": "keyword.operator",
-				"match": "+|-"
+				"name": "keyword.move.bfp",
+				"match": "[<>]"
 			},
 			{
-				"name": "keyword.move",
-				"match": "<|>"
+				"name": "keyword.io.bfp",
+				"match": "[\\.,]"
 			},
 			{
-				"name": "keyword.io",
-				"match": ".|,"
-
+				"name": "keyword.debug.bfp",
+				"match": "[\\\\:?\"\\|]"
 			}
 		]
 		}

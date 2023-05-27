@@ -20,6 +20,12 @@
       "language": "bfp",
       "scopeName": "source.bfp",
       "path": "./syntaxes/bfp.tmLanguage.json"
-    }]
+    }],
+    "themes": [
+      {
+        "label": "Dark Theme",
+        "path": "./themes/DarkTheme.tmTheme.json"
+      }
+    ]
   }
 }

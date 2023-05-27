@@ -1,0 +1,33 @@
+{
+  "name": "Dark",
+  "colors": {
+    "editor.foreground": "#FFFFFF",
+    "editor.background": "#000000"
+  },
+  "tokenColors": [
+    {
+      "scope": "keyword.operator.bfp",
+      "settings": {
+        "foreground": "#1FDD1F"
+      }
+    },
+    {
+      "scope": "keyword.move.bfp",
+      "settings": {
+        "foreground": "#ECCC52"
+      }
+    },
+    {
+      "scope": "keyword.io.bfp",
+      "settings": {
+        "foreground": "#DD0000"
+      }
+    },
+    {
+      "scope": "keyword.debug.bfp",
+      "settings": {
+        "foreground": "#DD11DD"
+      }
+    }
+  ]
+}
