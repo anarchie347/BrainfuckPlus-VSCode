@@ -4,28 +4,28 @@
 	"patterns": [
 		{
 			"include": "#keywords"
-		},
-		{
-			"include": "#strings"
 		}
 	],
 	"repository": {
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.bfp",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.double.bfp",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.bfp",
-					"match": "\\\\."
-				}
-			]
+				"match": "\\[|\\]"
+			},
+			{
+				"name": "keyword.operator",
+				"match": "+|-"
+			},
+			{
+				"name": "keyword.move",
+				"match": "<|>"
+			}
+			{
+				"name": "keyword.io",
+				"match": ".|,"
+
+			}
+		]
 		}
 	},
 	"scopeName": "source.bfp"
