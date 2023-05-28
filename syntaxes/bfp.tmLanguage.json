@@ -24,6 +24,18 @@
 			{
 				"name": "keyword.debug.bfp",
 				"match": "[\\\\:?\"\\|]"
+			},
+			{
+				"name": "keyword.repetition.bfp",
+				"match": "\\*"
+			},
+			{
+				"name": "comment.line.bfp",
+				"match": "/.*$"
+			},
+			{
+				"name": "constant.numeric.bfp",
+				"match": "[0123456789]"
 			}
 		]
 		}

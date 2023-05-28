@@ -6,6 +6,13 @@
   },
   "tokenColors": [
     {
+      "scope": "source",
+      "settings": {
+        "foreground": "#808080",
+        "fontStyle": "italic"
+      }
+    },
+    {
       "scope": "keyword.operator.bfp",
       "settings": {
         "foreground": "#1FDD1F"
@@ -20,13 +27,32 @@
     {
       "scope": "keyword.io.bfp",
       "settings": {
-        "foreground": "#DD0000"
+        "foreground": "#DD1F1F"
       }
     },
     {
       "scope": "keyword.debug.bfp",
       "settings": {
         "foreground": "#DD11DD"
+      }
+    },
+    {
+      "scope": "keyword.repetition.bfp",
+      "settings": {
+        "foreground": "#10AFFC"
+      }
+    },
+    {
+      "scope": "comment.line.bfp",
+      "settings": {
+        "foreground": "#808080",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "constant.numeric.bfp",
+      "settings": {
+        "foreground": "#67c28a"
       }
     }
   ]
