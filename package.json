@@ -9,23 +9,53 @@
   "categories": [
     "Programming Languages"
   ],
+  "activationEvents": [
+    "onCommand:extension.activate"
+  ],
+  "main": "out/extension.js",
   "contributes": {
-    "languages": [{
-      "id": "bfp",
-      "aliases": ["BrainfuckPlus", "bfp"],
-      "extensions": [".bfp"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "bfp",
-      "scopeName": "source.bfp",
-      "path": "./syntaxes/bfp.tmLanguage.json"
-    }],
+    "languages": [
+      {
+        "id": "bfp",
+        "aliases": [
+          "BrainfuckPlus",
+          "bfp"
+        ],
+        "extensions": [
+          ".bfp"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bfp",
+        "scopeName": "source.bfp",
+        "path": "./syntaxes/bfp.tmLanguage.json"
+      }
+    ],
     "themes": [
       {
         "label": "Dark Theme",
         "path": "./themes/DarkTheme.tmTheme.json"
       }
+    ],
+    "commands": [
+      {
+        "command": "bfp.load",
+        "title": "BEANS"
+      }
     ]
+  },
+  "dependencies": {
+    "@types/vscode": "^1.78.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
   }
 }
