@@ -1,0 +1,44 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "BrainfuckPlus",
+	"patterns": [
+		{
+			"include": "#keywords"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+			{
+				"name": "keyword.operator.bfp",
+				"match": "[\\+-]"
+			},
+			{
+				"name": "keyword.move.bfp",
+				"match": "[<>]"
+			},
+			{
+				"name": "keyword.io.bfp",
+				"match": "[\\.,]"
+			},
+			{
+				"name": "keyword.debug.bfp",
+				"match": "[\\\\:?\"\\|]"
+			},
+			{
+				"name": "keyword.repetition.bfp",
+				"match": "\\*"
+			},
+			{
+				"name": "comment.line.bfp",
+				"match": "/.*$"
+			},
+			{
+				"name": "constant.numeric.bfp",
+				"match": "[0123456789]"
+			}
+		]
+		}
+	},
+	"scopeName": "source.bfp"
+}
