@@ -7,13 +7,14 @@ export async function activate(context: vscode.ExtensionContext) {
     const provider = vscode.languages.registerDocumentSemanticTokensProvider(
         {
             language: "bfp",
-            scheme: "file"
+            scheme: "source"
         },
         new MySemanticTokensProvider(),
         new vscode.SemanticTokensLegend(["comment", "method"], [])
     );
     console.log("PROVIDER CREATED");
     context.subscriptions.push(provider);
+
     console.log("PROVIDER PUSHED")    
 }
 
@@ -34,9 +35,11 @@ async function UpdateMethodNames() {
 
 
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
-    provideDocumentSemanticTokens(document: vscode.TextDocument) {
-        const tokensBuilder = new vscode.SemanticTokensBuilder();
+    provideDocumentSemanticTokens(document: vscode.TextDocument): vscode.ProviderResult<vscode.SemanticTokens> {
         console.log("pdst began");
+        vscode.window.showInformationMessage("pdst");
+        const tokensBuilder = new vscode.SemanticTokensBuilder();
+        
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i).text;
             for (let j = 0; j < line.length; j++) {
@@ -44,9 +47,10 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
                 if (tokenType == 1) {
                     
                 }
-                tokensBuilder.push(i,j,1, tokenType)
+                
             }
         }
+        tokensBuilder.push(0,0,1, 1)
         return tokensBuilder.build();
     }
 
