@@ -6,24 +6,25 @@ export async function activate(context: vscode.ExtensionContext) {
 
    
 
-    //UpdateMethodNames();
+    UpdateMethodNames();
     
 }
 
 async function UpdateMethodNames() {
-    if (!vscode.window.activeTextEditor) {
-        return;
+    const files = await vscode.workspace.findFiles('**/*.bfp');
+    let methodNames: string = "";
+    for (let i = 0; i < files.length; i++) {
+        const workspaceFolders = vscode.workspace.workspaceFolders
+        //if in the same directory, rather than a nested one
+        if (workspaceFolders) {
+            if (path.dirname(files[i].fsPath) == workspaceFolders[0].uri.fsPath) {
+                console.log(path.basename(files[i].fsPath))
+                methodNames += path.basename(files[i].fsPath)[0];
+            }
+        }
     }
-
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
-    if (!workspaceFolder) {
-        return;
-    }
-
-    const files = await vscode.workspace.findFiles('**/*.bfp')
-    const filenames = files.map(file => path.basename(file.fsPath, ".bfp"))
-
-    const decorations = vscode.DecorationOptions[] = [];
+    console.log("ok");
+    console.log(methodNames);
 }
 
 
