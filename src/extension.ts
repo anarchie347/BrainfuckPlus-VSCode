@@ -3,11 +3,13 @@ import * as vscodetextmate from 'vscode-textmate'
 import * as path from 'path';
 
 export async function activate(context: vscode.ExtensionContext) {
+    console.log("ACTIVATED");
     UpdateMethodNames();
+    
     const provider = vscode.languages.registerDocumentSemanticTokensProvider(
         {
             language: "bfp",
-            scheme: "source"
+            scheme: "file"
         },
         new MySemanticTokensProvider(),
         new vscode.SemanticTokensLegend(["comment", "method"], [])
@@ -35,7 +37,7 @@ async function UpdateMethodNames() {
 
 
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
-    provideDocumentSemanticTokens(document: vscode.TextDocument): vscode.ProviderResult<vscode.SemanticTokens> {
+    provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
         console.log("pdst began");
         vscode.window.showInformationMessage("pdst");
         const tokensBuilder = new vscode.SemanticTokensBuilder();
@@ -49,8 +51,9 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
                 }
                 
             }
+            tokensBuilder.push(i,0,1, 1)
         }
-        tokensBuilder.push(0,0,1, 1)
+        
         return tokensBuilder.build();
     }
 
