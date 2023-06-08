@@ -13,6 +13,11 @@
     "onCommand:extension.activate"
   ],
   "main": "out/extension.js",
+  "configurationDefaults": {
+    "[bfp]": {
+      "editor.semanticHighlighting.enabled": true
+    }
+  },
   "contributes": {
     "languages": [
       {
