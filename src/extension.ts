@@ -37,9 +37,9 @@ async function UpdateMethodNames() {
 
 
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
-    syncprovideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
-        console.log("pdst began");
-        vscode.window.showInformationMessage("pdst");
+    oldsyncprovideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
+        //console.log("pdst began");
+        //vscode.window.showInformationMessage("pdst");
         const tokensBuilder = new vscode.SemanticTokensBuilder();
         
         for (let i = 0; i < document.lineCount; i++) {
@@ -59,7 +59,7 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
 
     async provideDocumentSemanticTokens(document: vscode.TextDocument) : Promise<vscode.SemanticTokens | null> {
         const tokensBuilder = new vscode.SemanticTokensBuilder();
-        console.log("old pdst began");
+        console.log("PDST BEGAN");
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i).text;
             for (let j = 0; j < line.length; j++) {
@@ -67,7 +67,8 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
                 if (tokenType == 1) {
                     
                 }
-                tokensBuilder.push(i,j,1, tokenType)
+                tokensBuilder.push(i,j,1, tokenType);
+                console.log(document.lineAt(i).text[j]);
             }
         }
         return tokensBuilder.build();
