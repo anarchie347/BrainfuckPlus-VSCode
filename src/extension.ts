@@ -6,16 +6,12 @@ export async function activate(context: vscode.ExtensionContext) {
     console.log("ACTIVATED");
     UpdateMethodNames();
     
-    const provider = vscode.languages.registerDocumentSemanticTokensProvider(
-        {
-            language: "bfp",
-            scheme: "file"
-        },
-        new MySemanticTokensProvider(),
-        new vscode.SemanticTokensLegend(["comment", "method"], [])
+    
+    getProvider().then(
+        (provider) => {
+            context.subscriptions.push(provider);
+        }
     );
-    console.log("PROVIDER CREATED");
-    context.subscriptions.push(provider);
 
     console.log("PROVIDER PUSHED")    
 }
@@ -33,6 +29,24 @@ async function UpdateMethodNames() {
         }
     }
     console.log("METHODNAMES UPDATED");
+}
+
+function getProvider() {
+    return new Promise<vscode.Disposable>(
+        (resolve, reject) => {
+            const provider = vscode.languages.registerDocumentSemanticTokensProvider(
+                {
+                    language: "bfp",
+                    scheme: "file"
+                },
+                new MySemanticTokensProvider(),
+                new vscode.SemanticTokensLegend(["comment", "method"], [])
+            );
+            console.log("semantic highlighting worked out");
+            
+            resolve(provider);
+        }
+    );
 }
 
 
@@ -67,9 +81,10 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
                 if (tokenType == 1) {
                     
                 }
-                tokensBuilder.push(i,j,1, tokenType);
-                console.log(document.lineAt(i).text[j]);
+                
             }
+            tokensBuilder.push(i,0,1,1)
+            console.log(document.lineAt(i).text[0]);
         }
         return tokensBuilder.build();
     }

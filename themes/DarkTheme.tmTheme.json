@@ -54,12 +54,10 @@
       "settings": {
         "foreground": "#67c28a"
       }
-    },
-    {
-      "scope": "method.bfp",
-      "settings": {
-        "foreground": "#03e8fc"
-      }
     }
-  ]
+  ],
+  "semanticHighlighting": true,
+  "semanticTokenColors": {
+    "method": "#ff8400"
+  }
 }
