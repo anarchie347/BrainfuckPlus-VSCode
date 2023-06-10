@@ -66,18 +66,15 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
         //console.log("pdst began");
         //vscode.window.showInformationMessage("pdst");
         const tokensBuilder = new vscode.SemanticTokensBuilder();
-        
+        const text = document.getText();
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i).text;
             for (let j = 0; j < line.length; j++) {
-                const tokenType = 1;
-                if (tokenType == 1) {
-                    
+                if (methodNames.includes(line[j])) {
+                    tokensBuilder.push(i,j,1,1)
                 }
                 
             }
-            tokensBuilder.push(i,0,1, 1)
-            console.log("Added " + document.lineAt(i).text[0])
         }
         
         return tokensBuilder.build();
