@@ -2,17 +2,28 @@ import * as vscode from 'vscode';
 import * as vscodetextmate from 'vscode-textmate'
 import * as path from 'path';
 
+let methodNames : string = "abCD";
+
 export async function activate(context: vscode.ExtensionContext) {
     console.log("ACTIVATED");
     UpdateMethodNames();
     
-    
+    const provider = vscode.languages.registerDocumentSemanticTokensProvider(
+        {
+            language: "bfp",
+            scheme: "file"
+        },
+        new MySemanticTokensProvider(),
+        new vscode.SemanticTokensLegend(["comment", "method"], [])
+    );
+    console.log("semantic highlighting worked out");
+    /*
     getProvider().then(
         (provider) => {
             context.subscriptions.push(provider);
         }
     );
-
+*/
     console.log("PROVIDER PUSHED")    
 }
 
@@ -51,7 +62,7 @@ function getProvider() {
 
 
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
-    oldsyncprovideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
+    provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
         //console.log("pdst began");
         //vscode.window.showInformationMessage("pdst");
         const tokensBuilder = new vscode.SemanticTokensBuilder();
@@ -66,12 +77,13 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
                 
             }
             tokensBuilder.push(i,0,1, 1)
+            console.log("Added " + document.lineAt(i).text[0])
         }
         
         return tokensBuilder.build();
     }
 
-    async provideDocumentSemanticTokens(document: vscode.TextDocument) : Promise<vscode.SemanticTokens | null> {
+    async oldprovideDocumentSemanticTokens(document: vscode.TextDocument) : Promise<vscode.SemanticTokens | null> {
         const tokensBuilder = new vscode.SemanticTokensBuilder();
         console.log("PDST BEGAN");
         for (let i = 0; i < document.lineCount; i++) {
