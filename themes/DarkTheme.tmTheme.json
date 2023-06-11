@@ -1,9 +1,5 @@
 {
   "name": "Dark",
-  "colors": {
-    "editor.foreground": "#FFFFFF",
-    "editor.background": "#000000"
-  },
   "tokenColors": [
     {
       "scope": "source",
