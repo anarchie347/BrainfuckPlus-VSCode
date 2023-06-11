@@ -42,6 +42,7 @@
     "themes": [
       {
         "label": "Dark Theme",
+        "uiTheme": "vs-dark",
         "path": "./themes/DarkTheme.tmTheme.json"
       }
     ]
