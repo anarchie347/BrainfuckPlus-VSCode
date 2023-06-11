@@ -8,6 +8,7 @@ export async function activate(context: vscode.ExtensionContext) {
     console.log("ACTIVATED");
     UpdateMethodNames();
 
+    //for method highlighting
     const changeWSFolder = vscode.workspace.onDidChangeWorkspaceFolders(UpdateMethodNames);
     const createFile = vscode.workspace.onDidCreateFiles(UpdateMethodNames);
     const deleteFile = vscode.workspace.onDidDeleteFiles(UpdateMethodNames);
@@ -16,6 +17,8 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createFile);
     context.subscriptions.push(deleteFile);
     context.subscriptions.push(renameFile);
+
+    //for errors
     
     const provider = vscode.languages.registerDocumentSemanticTokensProvider(
         {
@@ -25,6 +28,11 @@ export async function activate(context: vscode.ExtensionContext) {
         new MySemanticTokensProvider(),
         new vscode.SemanticTokensLegend(["comment", "method"], [])
     );
+
+    const languageProvider = new MyLanguageProvider();
+    context.subscriptions.push(provider);
+    context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
+    context.subscriptions.push(languageProvider);
 }
 
 async function UpdateMethodNames() {
@@ -60,6 +68,48 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
         }
         
         return tokensBuilder.build();
+    }
+}
+
+class MyLanguageProvider implements vscode.Disposable {
+    private diagnosticCollection: vscode.DiagnosticCollection;
+    constructor() {
+        this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
+    }
+
+    provideDiagnosticCollection(document: vscode.TextDocument) {
+        console.log("diagnostic");
+        this.diagnosticCollection.delete(document.uri);
+
+        const text = document.getText();
+        
+        let lineNo: number = 0;
+        let charNo: number = 0;
+        const lineCount = document.lineCount;
+        
+
+
+        while (!(lineNo == lineCount)) {
+            const lineText = document.lineAt(lineNo).text;
+            
+            //repetition
+            if (lineText[charNo] == "*") {
+                const range = new vscode.Range(lineNo, charNo, lineNo, charNo);
+                const diag: vscode.Diagnostic = new vscode.Diagnostic(range, "TESTING", vscode.DiagnosticSeverity.Error);
+            }
+
+
+            charNo++;
+            if (charNo == lineText.length) {
+                charNo == 0;
+                lineNo++;
+            }
+        }
+    }
+
+    dispose() {
+        this.diagnosticCollection.clear();
+        this.diagnosticCollection.dispose();
     }
 }
 
