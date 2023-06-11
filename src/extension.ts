@@ -7,6 +7,15 @@ let methodNames : string = "abCD";
 export async function activate(context: vscode.ExtensionContext) {
     console.log("ACTIVATED");
     UpdateMethodNames();
+
+    const changeWSFolder = vscode.workspace.onDidChangeWorkspaceFolders(UpdateMethodNames);
+    const createFile = vscode.workspace.onDidCreateFiles(UpdateMethodNames);
+    const deleteFile = vscode.workspace.onDidDeleteFiles(UpdateMethodNames);
+    const renameFile = vscode.workspace.onDidRenameFiles(UpdateMethodNames);
+    context.subscriptions.push(changeWSFolder);
+    context.subscriptions.push(createFile);
+    context.subscriptions.push(deleteFile);
+    context.subscriptions.push(renameFile);
     
     const provider = vscode.languages.registerDocumentSemanticTokensProvider(
         {
@@ -29,9 +38,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 async function UpdateMethodNames() {
     const files = await vscode.workspace.findFiles('**/*.bfp');
-    let methodNames: string = "";
+    methodNames = "";
     for (let i = 0; i < files.length; i++) {
-        const workspaceFolders = vscode.workspace.workspaceFolders
+        const workspaceFolders = vscode.workspace.workspaceFolders;
         //if in the same directory, rather than a nested one
         if (workspaceFolders) {
             if (path.dirname(files[i].fsPath) == workspaceFolders[0].uri.fsPath) {
@@ -39,7 +48,7 @@ async function UpdateMethodNames() {
             }
         }
     }
-    console.log("METHODNAMES UPDATED");
+    console.log("METHODNAMES UPDATED: " + methodNames);
 }
 
 function getProvider() {
