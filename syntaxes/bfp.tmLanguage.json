@@ -27,15 +27,15 @@
 			},
 			{
 				"name": "keyword.repetition.bfp",
-				"match": "\\*"
+				"match": "\\*(1|2|3|4|5|6|7|8|9|0)*"
 			},
 			{
 				"name": "comment.line.bfp",
 				"match": "/.*$"
 			},
 			{
-				"name": "constant.numeric.bfp",
-				"match": "[0123456789]"
+				"name": "keyword.injectioncall.bfp",
+				"match": "\\((0|1|2|3|4|5|6|7|8|9)*\\)"
 			}
 		]
 		}

@@ -46,7 +46,7 @@
       }
     },
     {
-      "scope": "constant.numeric.bfp",
+      "scope": "keyword.injectioncall.bfp",
       "settings": {
         "foreground": "#67c28a"
       }
