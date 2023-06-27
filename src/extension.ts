@@ -29,6 +29,38 @@ export async function activate(context: vscode.ExtensionContext) {
         new vscode.SemanticTokensLegend(["method"])
     );
 
+    vscode.languages.registerCodeActionsProvider("bfp", { provideCodeActions(document : vscode.TextDocument, range : vscode.Range, context : vscode.CodeActionContext, token : vscode.CancellationToken) {
+        const codeActions = [];
+    
+        let regex = new RegExp(/[A-Z]/)
+        for (let i = 0; i < document.lineCount; i++) {
+            const result = regex.exec(document.lineAt(i).text)
+            if (result) {
+                const diagnostic = new vscode.Diagnostic(
+                    new vscode.Range(
+                        new vscode.Position(i, result.index),
+                        new vscode.Position(i, result.index + 1)
+                    ),
+                    "TEST ERROR",
+                    vscode.DiagnosticSeverity.Error
+                );
+                codeActions.push(diagnostic);
+
+                const codeAction = new vscode.CodeAction(
+                    "Stop running the test build",
+                    vscode.CodeActionKind.QuickFix
+                );
+
+                codeAction.diagnostics = [diagnostic];
+                codeAction.isPreferred = true;
+                codeAction.edit = new vscode.WorkspaceEdit();
+
+                codeActions.push(codeAction);
+                vscode.prov
+            }
+        }
+        
+        return codeActions }});
     //const languageProvider = new MyLanguageProvider();
     //context.subscriptions.push(provider);
     //context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
@@ -48,6 +80,28 @@ async function UpdateMethodNames() {
         }
     }
     console.log("METHODNAMES UPDATED: " + methodNames);
+}
+
+function provideCodeActionsold(document : vscode.TextDocument, range : vscode.Range, context : vscode.CodeActionContext, token : vscode.CancellationToken) {
+    const codeActions = [];
+
+    let regex = new RegExp(/[A-Z]/)
+    for (let i = 0; i < document.lineCount; i++) {
+        const result = regex.exec(document.lineAt(i).text)
+        if (result) {
+            const diagnostic = new vscode.Diagnostic(
+                new vscode.Range(
+                    new vscode.Position(i, result.index),
+                    new vscode.Position(i, result.index + 1)
+                ),
+                "TEST ERROR",
+                vscode.DiagnosticSeverity.Error
+            );
+            codeActions.push(diagnostic);
+        }
+    }
+    
+    return codeActions;
 }
 
 
