@@ -26,13 +26,26 @@ export async function activate(context: vscode.ExtensionContext) {
             scheme: "file"
         },
         new MySemanticTokensProvider(),
-        new vscode.SemanticTokensLegend(["comment", "method"], [])
+        new vscode.SemanticTokensLegend(["method"])
     );
 
-    const languageProvider = new MyLanguageProvider();
-    context.subscriptions.push(provider);
-    context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
-    context.subscriptions.push(languageProvider);
+    const diagnosticCollection = vscode.languages.createDiagnosticCollection("TESTDIAG");
+    vscode.workspace.onDidChangeTextDocument(event => {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && event.document === activeEditor.document) {
+            validateTextDocument(event.document, diagnosticCollection);
+        }
+    })
+
+    if (vscode.window.activeTextEditor) {
+        validateTextDocument(vscode.window.activeTextEditor.document, diagnosticCollection)
+    }
+
+    context.subscriptions.push(diagnosticCollection);
+    //const languageProvider = new MyLanguageProvider();
+    //context.subscriptions.push(provider);
+    //context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
+    //context.subscriptions.push(languageProvider);
 }
 
 async function UpdateMethodNames() {
@@ -50,6 +63,45 @@ async function UpdateMethodNames() {
     console.log("METHODNAMES UPDATED: " + methodNames);
 }
 
+function validateTextDocument(document : vscode.TextDocument, diagnosticCollection : vscode.DiagnosticCollection) {
+    const diagnostics : vscode.Diagnostic[] = []
+    for (let i = 0; i < document.lineCount; i++) {
+        const line = document.lineAt(i);
+
+        const regex = /[A-Z]/g;
+        let match;
+        while ((match = regex.exec(line.text)) !== null) {
+            const diagnosticRange = new vscode.Range(i, match.index, i, match.index + 1)
+
+            const diagnostic = new vscode.Diagnostic( diagnosticRange, "TEST", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+        }
+    }
+    diagnosticCollection.set(document.uri, diagnostics);
+}
+
+function provideCodeActionsold(document : vscode.TextDocument, range : vscode.Range, context : vscode.CodeActionContext, token : vscode.CancellationToken) {
+    const codeActions = [];
+
+    let regex = new RegExp(/[A-Z]/)
+    for (let i = 0; i < document.lineCount; i++) {
+        const result = regex.exec(document.lineAt(i).text)
+        if (result) {
+            const diagnostic = new vscode.Diagnostic(
+                new vscode.Range(
+                    new vscode.Position(i, result.index),
+                    new vscode.Position(i, result.index + 1)
+                ),
+                "TEST ERROR",
+                vscode.DiagnosticSeverity.Error
+            );
+            codeActions.push(diagnostic);
+        }
+    }
+    
+    return codeActions;
+}
+
 
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
@@ -61,7 +113,7 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
             const line = document.lineAt(i).text;
             for (let j = 0; j < line.length; j++) {
                 if (methodNames.includes(line[j])) {
-                    tokensBuilder.push(i,j,1,1)
+                    tokensBuilder.push(i, j, 1, 0, 0);
                 }
                 
             }
