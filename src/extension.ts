@@ -26,13 +26,13 @@ export async function activate(context: vscode.ExtensionContext) {
             scheme: "file"
         },
         new MySemanticTokensProvider(),
-        new vscode.SemanticTokensLegend(["comment", "method"], [])
+        new vscode.SemanticTokensLegend(["method"])
     );
 
-    const languageProvider = new MyLanguageProvider();
-    context.subscriptions.push(provider);
-    context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
-    context.subscriptions.push(languageProvider);
+    //const languageProvider = new MyLanguageProvider();
+    //context.subscriptions.push(provider);
+    //context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
+    //context.subscriptions.push(languageProvider);
 }
 
 async function UpdateMethodNames() {
@@ -61,7 +61,7 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
             const line = document.lineAt(i).text;
             for (let j = 0; j < line.length; j++) {
                 if (methodNames.includes(line[j])) {
-                    tokensBuilder.push(i,j,1,1)
+                    tokensBuilder.push(i, j, 1, 0, 0);
                 }
                 
             }
