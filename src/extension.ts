@@ -64,7 +64,7 @@ async function UpdateMethodNames() {
 }
 
 function validateTextDocument(document : vscode.TextDocument, diagnosticCollection : vscode.DiagnosticCollection) {
-    const diagnostics : vscode.Diagnostic[] = []
+    /*const diagnostics : vscode.Diagnostic[] = []
     for (let i = 0; i < document.lineCount; i++) {
         const line = document.lineAt(i);
 
@@ -76,10 +76,45 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
             const diagnostic = new vscode.Diagnostic( diagnosticRange, "TEST", vscode.DiagnosticSeverity.Error)
             diagnostics.push(diagnostic);
         }
+
     }
     diagnosticCollection.set(document.uri, diagnostics);
-}
+    */
+   const diagnostics : vscode.Diagnostic[] = [];
+   let code : string = document.getText();
+   let j : number; //can be used to look around the nearby code while still storing the index the check began at
+   for (let i = 0; i < code.length; i++) {
+    j = i;
+    //start of injection call  
+    if (code[j] == "(") {
+        let charcode = code.charCodeAt(i);
+        do {
+            j++;
+            charcode = code.charCodeAt(j);
+        } while (charcode > 47 && charcode < 58);
+        //error check
+        if (code[j] != ")") {
+            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(j))
 
+            const diagnostic = new vscode.Diagnostic( diagnosticRange, "Invalid injection call", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+        }
+    }
+
+    i = j;
+   }
+}
+/*
+function getPositonFromIndex(document : vscode.TextDocument, index : number) : number {
+    let cumCharCount = 0;
+    let lineNo = 0;
+    while (cumCharCount < index) {
+        lineNo++;
+        cumCharCount += document.lineAt(lineNo).text.length;
+        document.positionAt()
+    }
+}
+*/
 function provideCodeActionsold(document : vscode.TextDocument, range : vscode.Range, context : vscode.CodeActionContext, token : vscode.CancellationToken) {
     const codeActions = [];
 
