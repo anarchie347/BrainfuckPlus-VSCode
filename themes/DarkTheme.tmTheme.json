@@ -14,25 +14,25 @@
       }
     },
     {
-      "scope": "keyword.move.bfp",
+      "scope": "keyword.operator.bfp",
       "settings": {
         "foreground": "#ECCC52"
       }
     },
     {
-      "scope": "keyword.io.bfp",
+      "scope": "keyword.operator.bfp",
       "settings": {
         "foreground": "#DD1F1F"
       }
     },
     {
-      "scope": "keyword.debug.bfp",
+      "scope": "support.bfp",
       "settings": {
         "foreground": "#DD11DD"
       }
     },
     {
-      "scope": "keyword.repetition.bfp",
+      "scope": "keyword.control.bfp",
       "settings": {
         "foreground": "#10AFFC"
       }
@@ -45,7 +45,7 @@
       }
     },
     {
-      "scope": "keyword.injectioncall.bfp",
+      "scope": "keyword.other.bfp",
       "settings": {
         "foreground": "#67c28a"
       }

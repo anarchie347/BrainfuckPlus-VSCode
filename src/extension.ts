@@ -33,6 +33,20 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(provider);
     //context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
     context.subscriptions.push(languageProvider);
+
+    const diagnosticCollection = vscode.languages.createDiagnosticCollection("TESTDIAG");
+    vscode.workspace.onDidChangeTextDocument(event => {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && event.document === activeEditor.document) {
+            validateTextDocument(event.document, diagnosticCollection);
+        }
+    })
+
+    if (vscode.window.activeTextEditor) {
+        validateTextDocument(vscode.window.activeTextEditor.document, diagnosticCollection)
+    }
+
+    context.subscriptions.push(diagnosticCollection);
 }
 
 async function UpdateMethodNames() {
@@ -135,7 +149,7 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
             const line = document.lineAt(i).text;
             for (let j = 0; j < line.length; j++) {
                 if (methodNames.includes(line[j])) {
-                    tokensBuilder.push(i, j, 1, 0, 0);
+                    tokensBuilder.push(i, j, 1, 0);
                 }
                 
             }
