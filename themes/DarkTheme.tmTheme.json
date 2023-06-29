@@ -4,8 +4,7 @@
     {
       "scope": "source",
       "settings": {
-        "foreground": "#808080",
-        "fontStyle": "italic"
+        "foreground": "#FFFFFF"
       }
     },
     {

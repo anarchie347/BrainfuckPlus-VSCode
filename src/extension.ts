@@ -29,23 +29,10 @@ export async function activate(context: vscode.ExtensionContext) {
         new vscode.SemanticTokensLegend(["method"])
     );
 
-    const diagnosticCollection = vscode.languages.createDiagnosticCollection("TESTDIAG");
-    vscode.workspace.onDidChangeTextDocument(event => {
-        const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor && event.document === activeEditor.document) {
-            validateTextDocument(event.document, diagnosticCollection);
-        }
-    })
-
-    if (vscode.window.activeTextEditor) {
-        validateTextDocument(vscode.window.activeTextEditor.document, diagnosticCollection)
-    }
-
-    context.subscriptions.push(diagnosticCollection);
-    //const languageProvider = new MyLanguageProvider();
-    //context.subscriptions.push(provider);
+    const languageProvider = new MyLanguageProvider();
+    context.subscriptions.push(provider);
     //context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({language: "bfp"}, languageProvider));
-    //context.subscriptions.push(languageProvider);
+    context.subscriptions.push(languageProvider);
 }
 
 async function UpdateMethodNames() {
