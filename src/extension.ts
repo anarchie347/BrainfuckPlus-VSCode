@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as vscodetextmate from 'vscode-textmate'
 import * as path from 'path';
+import { start } from 'repl';
 
 let methodNames : string = "";
 
@@ -87,6 +88,7 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
    let j : number; //can be used to look around the nearby code while still storing the index the check began at
    for (let i = 0; i < code.length; i++) {
     j = i;
+    //comment
     if (code[i] == "/") {
         const nextlinePos = new vscode.Position(document.positionAt(i).line + 1,0)
         i = document.offsetAt(nextlinePos) - 1;
@@ -94,54 +96,75 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
     }
     //start of injection call  
     if (code[i] == "(") {
-        //if empty
-        if (code[i + 1] == ")") {
-            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(i + 2));
-                const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid injection call - brackets cannot be empty", vscode.DiagnosticSeverity.Error);
-                diagnostics.push(diagnostic);
-                continue;
+        const numCheckResponse = NumCheck(document, i + 1, ")");
+        if (numCheckResponse.result == NumCheckResult.Valid) {
+            continue;
         }
 
-        let charcode = code.charCodeAt(i);
-        do {
-            j++;
-            charcode = code.charCodeAt(j);
-        } while (charcode > 47 && charcode < 58);
-        //error check
-        
-        if (code[j] != ")") {
-            const nextCLoseBracket = code.indexOf(")", j + 1)
-            //if brackets closed
-            if (nextCLoseBracket > -1) {
-                const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(nextCLoseBracket + 1));
-                const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid injection call - brackets must contain a non-negative integer", vscode.DiagnosticSeverity.Error);
-                diagnostics.push(diagnostic);
-            }
-            //if brackets not closed
-            else {
-                const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(i + 1));
-                const diagnostic = new vscode.Diagnostic(diagnosticRange, "No close bracket for injection call", vscode.DiagnosticSeverity.Error);
-                diagnostics.push(diagnostic);
-            }
+        const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(numCheckResponse.endChar + 1))
+        let errorMsg = "Uknown error - this shouldn't happen";
+        switch (numCheckResponse.result) {
+            case NumCheckResult.Empty:
+                errorMsg = "Invalid injection call - brackets cannot be empty";
+                break;
+            case NumCheckResult.MissingEndChar:
+                errorMsg = "Invalid injection call - no close bracket";
+                break;
+            case NumCheckResult.NonInteger:
+                errorMsg = "Invalid injection call - brackets must contain a non-negative integer";
+                break;
         }
+        const diagnostic = new vscode.Diagnostic(diagnosticRange, errorMsg, vscode.DiagnosticSeverity.Error)
+        diagnostics.push(diagnostic);
     }
+
+    //
 
     i = j;
    }
    diagnosticCollection.set(document.uri, diagnostics);
    return diagnostics;
 }
-/*
-function getPositonFromIndex(document : vscode.TextDocument, index : number) : number {
-    let cumCharCount = 0;
-    let lineNo = 0;
-    while (cumCharCount < index) {
-        lineNo++;
-        cumCharCount += document.lineAt(lineNo).text.length;
-        document.positionAt()
+
+function NumCheck(document : vscode.TextDocument, startIndex : number, endChar : string) : { result : NumCheckResult, endChar : number} {
+    const code = document.getText();
+    if (code[startIndex] == endChar) {
+        return {
+            result: NumCheckResult.Empty,
+            endChar: startIndex
+        };
     }
+
+    let charCode = code.charCodeAt(startIndex);
+    let index = startIndex;
+    while (charCode > 47 && charCode < 58) {
+        index++;
+        charCode = code.charCodeAt(index)
+    } 
+
+    if (code[index] != endChar) {
+        const nextEndChar = code.indexOf(endChar, index + 1);
+        if (nextEndChar > -1) {
+            return {
+                result: NumCheckResult.NonInteger,
+                endChar: nextEndChar
+            };
+        }
+
+        return {
+            result: NumCheckResult.MissingEndChar,
+            endChar: startIndex - 1
+        }
+    }
+
+    return {
+        result: NumCheckResult.Valid,
+        endChar: index
+    };
+
 }
-*/
+
+
 function provideCodeActionsold(document : vscode.TextDocument, range : vscode.Range, context : vscode.CodeActionContext, token : vscode.CancellationToken) {
     const codeActions = [];
 
@@ -227,4 +250,6 @@ class MyLanguageProvider implements vscode.Disposable {
     }
 }
 
+
+enum NumCheckResult {NonInteger, Empty, MissingEndChar, Valid}
 
