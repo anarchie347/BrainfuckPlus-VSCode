@@ -83,27 +83,53 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
     */
    const diagnostics : vscode.Diagnostic[] = [];
    let code : string = document.getText();
+   console.log(`Line: ${document.positionAt(5).line}, Position: ${document.positionAt(5).character}`);
    let j : number; //can be used to look around the nearby code while still storing the index the check began at
    for (let i = 0; i < code.length; i++) {
     j = i;
+    if (code[i] == "/") {
+        const nextlinePos = new vscode.Position(document.positionAt(i).line + 1,0)
+        i = document.offsetAt(nextlinePos) - 1;
+        continue;
+    }
     //start of injection call  
-    if (code[j] == "(") {
+    if (code[i] == "(") {
+        //if empty
+        if (code[i + 1] == ")") {
+            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(i + 2));
+                const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid injection call - brackets cannot be empty", vscode.DiagnosticSeverity.Error);
+                diagnostics.push(diagnostic);
+                continue;
+        }
+
         let charcode = code.charCodeAt(i);
         do {
             j++;
             charcode = code.charCodeAt(j);
         } while (charcode > 47 && charcode < 58);
         //error check
+        
         if (code[j] != ")") {
-            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(j))
-
-            const diagnostic = new vscode.Diagnostic( diagnosticRange, "Invalid injection call", vscode.DiagnosticSeverity.Error)
-            diagnostics.push(diagnostic);
+            const nextCLoseBracket = code.indexOf(")", j + 1)
+            //if brackets closed
+            if (nextCLoseBracket > -1) {
+                const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(nextCLoseBracket + 1));
+                const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid injection call - brackets must contain a non-negative integer", vscode.DiagnosticSeverity.Error);
+                diagnostics.push(diagnostic);
+            }
+            //if brackets not closed
+            else {
+                const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(i + 1));
+                const diagnostic = new vscode.Diagnostic(diagnosticRange, "No close bracket for injection call", vscode.DiagnosticSeverity.Error);
+                diagnostics.push(diagnostic);
+            }
         }
     }
 
     i = j;
    }
+   diagnosticCollection.set(document.uri, diagnostics);
+   return diagnostics;
 }
 /*
 function getPositonFromIndex(document : vscode.TextDocument, index : number) : number {
