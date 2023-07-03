@@ -144,6 +144,8 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
             diagnostics.push(diagnostic);
             continue;
         }
+        //go back one character if successful so that the instruction char is analysed on next loop
+        j--;
     }
 
     i = j;
