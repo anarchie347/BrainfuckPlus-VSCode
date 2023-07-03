@@ -94,7 +94,7 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
         i = document.offsetAt(nextlinePos) - 1;
         continue;
     }
-    //start of injection call  
+    //injection call  
     if (code[i] == "(") {
         const numCheckResponse = NumCheck(document, i + 1, ")");
         if (numCheckResponse.result == NumCheckResult.Valid) {
@@ -118,7 +118,33 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
         diagnostics.push(diagnostic);
     }
 
-    //
+    //shorthand repetition
+    if (code[i] == "*") {
+        const reg = /[0-9]/
+        if (!/[0-9]/.test(code[i + 1])) {
+            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(i + 1))
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid shorthand repetition - no number", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+            continue;
+        }
+        let charCode;
+        do {
+            j++;
+            charCode = code.charCodeAt(j);
+        } while (charCode > 47 && charCode < 58)
+        if (!code[j]) {
+            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(j))
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - no instruction", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+            continue;
+        }
+        if (!isCodeChar(code[j], { debug: true, methods: true, bfp: false}, "(")) {
+            const diagnosticRange = new vscode.Range(document.positionAt(j), document.positionAt(j + 1))
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - invalid instruction", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+            continue;
+        }
+    }
 
     i = j;
    }
@@ -162,6 +188,21 @@ function NumCheck(document : vscode.TextDocument, startIndex : number, endChar :
         endChar: index
     };
 
+}
+
+function isCodeChar(char : string, extraChars : {debug : boolean, methods : boolean, bfp : boolean}, miscExtraChars : string) : boolean {
+    let codeChars : string = "+-,.<>[]";
+    if (extraChars.debug) {
+        codeChars += "\\:?\"|"
+    }
+    if (extraChars.methods) {
+        codeChars += methodNames;
+    }
+    if (extraChars.bfp) {
+        codeChars += "{}()*";
+    }
+    codeChars += miscExtraChars;
+    return codeChars.indexOf(char) > -1
 }
 
 
