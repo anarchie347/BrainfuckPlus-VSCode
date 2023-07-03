@@ -66,90 +66,131 @@ async function UpdateMethodNames() {
 }
 
 function validateTextDocument(document : vscode.TextDocument, diagnosticCollection : vscode.DiagnosticCollection) {
-    /*const diagnostics : vscode.Diagnostic[] = []
-    for (let i = 0; i < document.lineCount; i++) {
-        const line = document.lineAt(i);
 
-        const regex = /[A-Z]/g;
-        let match;
-        while ((match = regex.exec(line.text)) !== null) {
-            const diagnosticRange = new vscode.Range(i, match.index, i, match.index + 1)
-
-            const diagnostic = new vscode.Diagnostic( diagnosticRange, "TEST", vscode.DiagnosticSeverity.Error)
-            diagnostics.push(diagnostic);
-        }
-
-    }
-    diagnosticCollection.set(document.uri, diagnostics);
-    */
    const diagnostics : vscode.Diagnostic[] = [];
    let code : string = document.getText();
    console.log(`Line: ${document.positionAt(5).line}, Position: ${document.positionAt(5).character}`);
    let j : number; //can be used to look around the nearby code while still storing the index the check began at
+
+   let CurlybracketOpenIndexes : number[] = [];
+   let CurlybracketCloseIndexes : number[] = [];
+   let SquarebracketOpenIndexes : number[] = [];
+   let SquarebracketCloseIndexes : number[] = [];
+
+
    for (let i = 0; i < code.length; i++) {
-    j = i;
-    //comment
-    if (code[i] == "/") {
-        const nextlinePos = new vscode.Position(document.positionAt(i).line + 1,0)
-        i = document.offsetAt(nextlinePos) - 1;
-        continue;
-    }
-    //injection call  
-    if (code[i] == "(") {
-        const numCheckResponse = NumCheck(document, i + 1, ")");
-        if (numCheckResponse.result == NumCheckResult.Valid) {
+        j = i;
+        //comment
+       if (code[i] == "/") {
+            const nextlinePos = new vscode.Position(document.positionAt(i).line + 1,0)
+            i = document.offsetAt(nextlinePos) - 1;
             continue;
+        }
+        //injection call  
+        if (code[i] == "(") {
+            const numCheckResponse = NumCheck(document, i + 1, ")");
+            if (numCheckResponse.result == NumCheckResult.Valid) {
+                continue;
+            }
+
+            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(numCheckResponse.endChar + 1))
+            let errorMsg = "Uknown error - this shouldn't happen";
+            switch (numCheckResponse.result) {
+                case NumCheckResult.Empty:
+                    errorMsg = "Invalid injection call - brackets cannot be empty";
+                    break;
+                case NumCheckResult.MissingEndChar:
+                    errorMsg = "Invalid injection call - no close bracket";
+                    break;
+                case NumCheckResult.NonInteger:
+                    errorMsg = "Invalid injection call - brackets must contain a non-negative integer";
+                    break;
+            }
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, errorMsg, vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
         }
 
-        const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(numCheckResponse.endChar + 1))
-        let errorMsg = "Uknown error - this shouldn't happen";
-        switch (numCheckResponse.result) {
-            case NumCheckResult.Empty:
-                errorMsg = "Invalid injection call - brackets cannot be empty";
-                break;
-            case NumCheckResult.MissingEndChar:
-                errorMsg = "Invalid injection call - no close bracket";
-                break;
-            case NumCheckResult.NonInteger:
-                errorMsg = "Invalid injection call - brackets must contain a non-negative integer";
-                break;
+        //shorthand repetition
+        if (code[i] == "*") {
+            const reg = /[0-9]/
+            if (!/[0-9]/.test(code[i + 1])) {
+                const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(i + 1))
+                const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid shorthand repetition - no number", vscode.DiagnosticSeverity.Error)
+                diagnostics.push(diagnostic);
+                continue;
+            }
+            let charCode;
+            do {
+                j++;
+                charCode = code.charCodeAt(j);
+            } while (charCode > 47 && charCode < 58)
+            if (!code[j]) {
+                const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(j))
+                const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - no instruction", vscode.DiagnosticSeverity.Error)
+                diagnostics.push(diagnostic);
+                continue;
+            }
+            if (!isCodeChar(code[j], { debug: true, methods: true, bfp: false}, "(")) {
+                const diagnosticRange = new vscode.Range(document.positionAt(j), document.positionAt(j + 1))
+                const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - invalid instruction", vscode.DiagnosticSeverity.Error)
+                diagnostics.push(diagnostic);
+                continue;
+            }
+            //go back one character if successful so that the instruction char is analysed on next loop
+            j--;
         }
-        const diagnostic = new vscode.Diagnostic(diagnosticRange, errorMsg, vscode.DiagnosticSeverity.Error)
-        diagnostics.push(diagnostic);
-    }
 
-    //shorthand repetition
-    if (code[i] == "*") {
-        const reg = /[0-9]/
-        if (!/[0-9]/.test(code[i + 1])) {
-            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(i + 1))
-            const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid shorthand repetition - no number", vscode.DiagnosticSeverity.Error)
-            diagnostics.push(diagnostic);
-            continue;
+        //bracket check
+        switch (code[i]) {
+            case "{":
+                CurlybracketOpenIndexes.push(i);
+                break;
+            case "}":
+                CurlybracketCloseIndexes.push(i);
+                break;
+            case "[":
+                SquarebracketOpenIndexes.push(i);
+                break;
+            case "]":
+                SquarebracketCloseIndexes.push(i);
+                break;
         }
-        let charCode;
-        do {
-            j++;
-            charCode = code.charCodeAt(j);
-        } while (charCode > 47 && charCode < 58)
-        if (!code[j]) {
-            const diagnosticRange = new vscode.Range(document.positionAt(i), document.positionAt(j))
-            const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - no instruction", vscode.DiagnosticSeverity.Error)
-            diagnostics.push(diagnostic);
-            continue;
-        }
-        if (!isCodeChar(code[j], { debug: true, methods: true, bfp: false}, "(")) {
-            const diagnosticRange = new vscode.Range(document.positionAt(j), document.positionAt(j + 1))
-            const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - invalid instruction", vscode.DiagnosticSeverity.Error)
-            diagnostics.push(diagnostic);
-            continue;
-        }
-        //go back one character if successful so that the instruction char is analysed on next loop
-        j--;
-    }
 
     i = j;
    }
+
+
+   //curly bracket check
+   if (CurlybracketOpenIndexes.length > CurlybracketCloseIndexes.length) {
+        for (let i = 0; i < CurlybracketOpenIndexes.length - CurlybracketCloseIndexes.length; i++) {
+            const diagnosticRange = new vscode.Range(document.positionAt(CurlybracketOpenIndexes[i]), document.positionAt(CurlybracketOpenIndexes[i] + 1))
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, "No corresponding } found", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+        }
+   } else if (CurlybracketOpenIndexes.length < CurlybracketCloseIndexes.length) {
+        for (let i = CurlybracketOpenIndexes.length; i < CurlybracketCloseIndexes.length; i++) {
+            const diagnosticRange = new vscode.Range(document.positionAt(CurlybracketCloseIndexes[i]), document.positionAt(CurlybracketCloseIndexes[i] + 1))
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, "No corresponding { found", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+        }
+   }
+
+   //square bracket check
+   if (SquarebracketOpenIndexes.length > SquarebracketCloseIndexes.length) {
+        for (let i = 0; i < SquarebracketOpenIndexes.length - SquarebracketCloseIndexes.length; i++) {
+            const diagnosticRange = new vscode.Range(document.positionAt(SquarebracketOpenIndexes[i]), document.positionAt(SquarebracketOpenIndexes[i] + 1))
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, "No corresponding } found", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+        }
+    } else if (SquarebracketOpenIndexes.length < SquarebracketCloseIndexes.length) {
+        for (let i = SquarebracketOpenIndexes.length; i < SquarebracketCloseIndexes.length; i++) {
+            const diagnosticRange = new vscode.Range(document.positionAt(SquarebracketCloseIndexes[i]), document.positionAt(SquarebracketCloseIndexes[i] + 1))
+            const diagnostic = new vscode.Diagnostic(diagnosticRange, "No corresponding { found", vscode.DiagnosticSeverity.Error)
+            diagnostics.push(diagnostic);
+        }
+    }
+
+
    diagnosticCollection.set(document.uri, diagnostics);
    return diagnostics;
 }
@@ -295,4 +336,3 @@ class MyLanguageProvider implements vscode.Disposable {
 
 
 enum NumCheckResult {NonInteger, Empty, MissingEndChar, Valid}
-
