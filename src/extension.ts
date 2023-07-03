@@ -66,10 +66,8 @@ async function UpdateMethodNames() {
 }
 
 function validateTextDocument(document : vscode.TextDocument, diagnosticCollection : vscode.DiagnosticCollection) {
-
    const diagnostics : vscode.Diagnostic[] = [];
    let code : string = document.getText();
-   console.log(`Line: ${document.positionAt(5).line}, Position: ${document.positionAt(5).character}`);
    let j : number; //can be used to look around the nearby code while still storing the index the check began at
 
    let CurlybracketOpenIndexes : number[] = [];
@@ -77,7 +75,7 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
    let SquarebracketOpenIndexes : number[] = [];
    let SquarebracketCloseIndexes : number[] = [];
 
-
+    //main loop for each char
    for (let i = 0; i < code.length; i++) {
         j = i;
         //comment
