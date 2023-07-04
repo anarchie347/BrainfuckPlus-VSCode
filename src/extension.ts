@@ -9,7 +9,7 @@ export async function activate(context: vscode.ExtensionContext) {
     console.log("BFP extension activated");
     UpdateMethodNames();
 
-    //for method highlighting
+    //for method name updates
     const changeWSFolder = vscode.workspace.onDidChangeWorkspaceFolders(UpdateMethodNames);
     const createFile = vscode.workspace.onDidCreateFiles(UpdateMethodNames);
     const deleteFile = vscode.workspace.onDidDeleteFiles(UpdateMethodNames);
@@ -18,6 +18,17 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createFile);
     context.subscriptions.push(deleteFile);
     context.subscriptions.push(renameFile);
+
+    //for method hiighlighting
+    const provider = vscode.languages.registerDocumentSemanticTokensProvider(
+        {
+            language: "bfp",
+            scheme: "file"
+        },
+        new MySemanticTokensProvider(),
+        new vscode.SemanticTokensLegend(["method"])
+    );
+    context.subscriptions.push(provider);
 
     //for errors
     const diagnosticCollection = vscode.languages.createDiagnosticCollection("TESTDIAG");
