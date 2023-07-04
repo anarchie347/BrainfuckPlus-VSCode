@@ -41,6 +41,7 @@
     ],
     "themes": [
       {
+        "id": "dark-theme",
         "label": "Dark Theme",
         "path": "./themes/DarkTheme.tmTheme.json",
         "uiTheme": "vs-dark"

@@ -1,5 +1,6 @@
 {
   "name": "Dark",
+  "type": "dark",
   "tokenColors": [
     {
       "scope": "source",
@@ -35,7 +36,7 @@
     {
       "scope": "keyword.control.bfp",
       "settings": {
-        "foreground": "#10AFFC"
+        "foreground": "#004FFC"
       }
     },
     {
@@ -46,7 +47,7 @@
       }
     },
     {
-      "scope": "entity.name.function.bfp",
+      "scope": "entity.name.section.bfp",
       "settings": {
         "foreground": "#67c28a"
       }
@@ -54,6 +55,9 @@
   ],
   "semanticHighlighting": true,
   "semanticTokenColors": {
-    "method": "#ff8400"
+    "entity": {
+      "foreground": "#40D2E4"
+    }
+    
   }
 }

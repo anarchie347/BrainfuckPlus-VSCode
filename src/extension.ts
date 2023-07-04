@@ -26,7 +26,7 @@ export async function activate(context: vscode.ExtensionContext) {
             scheme: "file"
         },
         new MySemanticTokensProvider(),
-        new vscode.SemanticTokensLegend(["method"])
+        new vscode.SemanticTokensLegend(["entity.name.function"])
     );
     context.subscriptions.push(provider);
 
