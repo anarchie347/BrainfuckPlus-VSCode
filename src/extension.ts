@@ -62,17 +62,17 @@ async function UpdateMethodNames() {
 }
 
 function validateTextDocument(document : vscode.TextDocument, diagnosticCollection : vscode.DiagnosticCollection) {
-   const diagnostics : vscode.Diagnostic[] = [];
-   let code : string = document.getText();
-   let j : number; //can be used to look around the nearby code while still storing the index the check began at
+    const diagnostics : vscode.Diagnostic[] = [];
+    let code : string = document.getText();
+    let j : number; //can be used to look around the nearby code while still storing the index the check began at
 
-   let CurlybracketOpenIndexes : number[] = [];
-   let CurlybracketCloseIndexes : number[] = [];
-   let SquarebracketOpenIndexes : number[] = [];
-   let SquarebracketCloseIndexes : number[] = [];
+    let CurlybracketOpenIndexes : number[] = [];
+    let CurlybracketCloseIndexes : number[] = [];
+    let SquarebracketOpenIndexes : number[] = [];
+    let SquarebracketCloseIndexes : number[] = [];
 
     //main loop for each char
-   for (let i = 0; i < code.length; i++) {
+    for (let i = 0; i < code.length; i++) {
         j = i;
         //comment
        if (code[i] == "/") {
@@ -151,26 +151,26 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
         }
 
     i = j;
-   }
+    }
 
 
    //curly bracket check
-   if (CurlybracketOpenIndexes.length > CurlybracketCloseIndexes.length) {
+    if (CurlybracketOpenIndexes.length > CurlybracketCloseIndexes.length) {
         for (let i = 0; i < CurlybracketOpenIndexes.length - CurlybracketCloseIndexes.length; i++) {
             const diagnosticRange = new vscode.Range(document.positionAt(CurlybracketOpenIndexes[i]), document.positionAt(CurlybracketOpenIndexes[i] + 1))
             const diagnostic = new vscode.Diagnostic(diagnosticRange, "No corresponding } found", vscode.DiagnosticSeverity.Error)
             diagnostics.push(diagnostic);
         }
-   } else if (CurlybracketOpenIndexes.length < CurlybracketCloseIndexes.length) {
+    } else if (CurlybracketOpenIndexes.length < CurlybracketCloseIndexes.length) {
         for (let i = CurlybracketOpenIndexes.length; i < CurlybracketCloseIndexes.length; i++) {
             const diagnosticRange = new vscode.Range(document.positionAt(CurlybracketCloseIndexes[i]), document.positionAt(CurlybracketCloseIndexes[i] + 1))
             const diagnostic = new vscode.Diagnostic(diagnosticRange, "No corresponding { found", vscode.DiagnosticSeverity.Error)
             diagnostics.push(diagnostic);
         }
-   }
+    }
 
-   //square bracket check
-   if (SquarebracketOpenIndexes.length > SquarebracketCloseIndexes.length) {
+    //square bracket check
+    if (SquarebracketOpenIndexes.length > SquarebracketCloseIndexes.length) {
         for (let i = 0; i < SquarebracketOpenIndexes.length - SquarebracketCloseIndexes.length; i++) {
             const diagnosticRange = new vscode.Range(document.positionAt(SquarebracketOpenIndexes[i]), document.positionAt(SquarebracketOpenIndexes[i] + 1))
             const diagnostic = new vscode.Diagnostic(diagnosticRange, "No corresponding } found", vscode.DiagnosticSeverity.Error)
@@ -185,8 +185,8 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
     }
 
 
-   diagnosticCollection.set(document.uri, diagnostics);
-   return diagnostics;
+    diagnosticCollection.set(document.uri, diagnostics);
+    return diagnostics;
 }
 
 function NumCheck(document : vscode.TextDocument, startIndex : number, endChar : string) : { result : NumCheckResult, endChar : number} {
