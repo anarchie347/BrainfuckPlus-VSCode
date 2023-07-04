@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(provider);
 
     //for errors
-    const diagnosticCollection = vscode.languages.createDiagnosticCollection("TESTDIAG");
+    const diagnosticCollection = vscode.languages.createDiagnosticCollection("BFPDiagnostics");
     vscode.workspace.onDidChangeTextDocument(event => {
         const activeEditor = vscode.window.activeTextEditor;
         if (activeEditor && event.document === activeEditor.document) {
@@ -44,6 +44,13 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     context.subscriptions.push(diagnosticCollection);
+
+    //update method names, then re-validate the text document once it is complete
+    UpdateMethodNames().finally(() => {
+        if (vscode.window.activeTextEditor) {
+            validateTextDocument(vscode.window.activeTextEditor.document, diagnosticCollection);
+        }
+    });
 }
 
 async function UpdateMethodNames() {
