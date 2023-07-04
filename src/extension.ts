@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import * as vscodetextmate from 'vscode-textmate'
 import * as path from 'path';
-import { start } from 'repl';
 
 let methodNames : string = "";
 
@@ -65,7 +63,6 @@ async function UpdateMethodNames() {
             }
         }
     }
-    console.log("METHODNAMES UPDATED: " + methodNames);
 }
 
 function validateTextDocument(document : vscode.TextDocument, diagnosticCollection : vscode.DiagnosticCollection) {
@@ -251,8 +248,6 @@ function isCodeChar(char : string, extraChars : {debug : boolean, methods : bool
 
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
-        //console.log("pdst began");
-        //vscode.window.showInformationMessage("pdst");
         const tokensBuilder = new vscode.SemanticTokensBuilder();
         const text = document.getText();
         for (let i = 0; i < document.lineCount; i++) {
