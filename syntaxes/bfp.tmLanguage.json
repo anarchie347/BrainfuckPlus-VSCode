@@ -14,15 +14,15 @@
 				"match": "[\\+-]"
 			},
 			{
-				"name": "keyword.operator.bfp",
+				"name": "variable.bfp",
 				"match": "[<>]"
 			},
 			{
-				"name": "keyword.operator.bfp",
+				"name": "keyword.other.bfp",
 				"match": "[\\.,]"
 			},
 			{
-				"name": "support.bfp",
+				"name": "support.function.bfp",
 				"match": "[\\\\:?\"\\|]"
 			},
 			{
@@ -34,8 +34,12 @@
 				"match": "/.*$"
 			},
 			{
-				"name": "keyword.other.bfp",
+				"name": "entity.name.function.bfp",
 				"match": "\\((0|1|2|3|4|5|6|7|8|9)*\\)"
+			},
+			{
+				"name": "comment.line.embedded.bfp",
+				"match": "[^\\{\\}\\[\\]]"
 			}
 		]
 		}

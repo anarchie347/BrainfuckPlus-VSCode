@@ -15,19 +15,19 @@
       }
     },
     {
-      "scope": "keyword.operator.bfp",
+      "scope": "variable.bfp",
       "settings": {
         "foreground": "#ECCC52"
       }
     },
     {
-      "scope": "keyword.operator.bfp",
+      "scope": "keyword.other.bfp",
       "settings": {
         "foreground": "#DD1F1F"
       }
     },
     {
-      "scope": "support.bfp",
+      "scope": "support.function.bfp",
       "settings": {
         "foreground": "#DD11DD"
       }
@@ -46,7 +46,7 @@
       }
     },
     {
-      "scope": "keyword.other.bfp",
+      "scope": "entity.name.function.bfp",
       "settings": {
         "foreground": "#67c28a"
       }
