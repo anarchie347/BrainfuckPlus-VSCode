@@ -251,9 +251,11 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
         const tokensBuilder = new vscode.SemanticTokensBuilder();
         const text = document.getText();
         for (let i = 0; i < document.lineCount; i++) {
-            const line = document.lineAt(i).text;
+            const line = document.lineAt(i).text;          
             for (let j = 0; j < line.length; j++) {
-                if (methodNames.includes(line[j])) {
+                if (line[j] == "/") {
+                    break;
+                } else if (methodNames.includes(line[j])) {
                     tokensBuilder.push(i, j, 1, 0);
                 }
                 
