@@ -9,6 +9,8 @@ export async function activate(context: vscode.ExtensionContext) {
     console.log("BFP extension activated");
     UpdateMethodNames();
 
+    const langFilter : vscode.DocumentFilter = {language: "bfp", scheme: "file"};
+
     //for method name updates
     const changeWSFolder = vscode.workspace.onDidChangeWorkspaceFolders(UpdateMethodNames);
     const createFile = vscode.workspace.onDidCreateFiles(UpdateMethodNames);
@@ -28,10 +30,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     //for method hiighlighting
     const tokenProvider = vscode.languages.registerDocumentSemanticTokensProvider(
-        {
-            language: "bfp",
-            scheme: "file"
-        },
+        langFilter,
         new MySemanticTokensProvider(),
         new vscode.SemanticTokensLegend(["entity.name.function"])
     );
@@ -47,10 +46,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     };
     const hoverProvider = vscode.languages.registerHoverProvider(
-        {
-            scheme: "file",
-            language: "bfp"
-        },
+        langFilter,
         hoverHandler
     );
     context.subscriptions.push(hoverProvider);
@@ -60,12 +56,12 @@ export async function activate(context: vscode.ExtensionContext) {
     const diagnosticCollection = vscode.languages.createDiagnosticCollection("BFPDiagnostics");
     vscode.workspace.onDidChangeTextDocument(event => {
         const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor && event.document === activeEditor.document) {
+        if (activeEditor && event.document === activeEditor.document && event.document.languageId === "bfp") {
             validateTextDocument(event.document, diagnosticCollection);
         }
     })
 
-    if (vscode.window.activeTextEditor) {
+    if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === "bfp") {
         validateTextDocument(vscode.window.activeTextEditor.document, diagnosticCollection)
     }
 
@@ -73,7 +69,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     //update method names, then re-validate the text document once it is complete
     UpdateMethodNames().finally(() => {
-        if (vscode.window.activeTextEditor) {
+        if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === "bfp") {
             validateTextDocument(vscode.window.activeTextEditor.document, diagnosticCollection);
         }
     });
