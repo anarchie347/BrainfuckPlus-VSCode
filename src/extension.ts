@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-let methodNames : string = "";
+//let methodNames : string = "";
+//let methods : {[folder : string] : {character : string, parameterDetails : string[], requiredCells : number[], description : string }[]} = {};
+let methods : Record<string, MethodInfo[]>
 
 export async function activate(context: vscode.ExtensionContext) {
     console.log("BFP extension activated");
@@ -53,16 +55,47 @@ export async function activate(context: vscode.ExtensionContext) {
 
 async function UpdateMethodNames() {
     const files = await vscode.workspace.findFiles('**/*.bfp');
-    methodNames = "";
-    for (let i = 0; i < files.length; i++) {
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        //if in the same directory, rather than a nested one
-        if (workspaceFolders) {
-            if (path.dirname(files[i].fsPath) == workspaceFolders[0].uri.fsPath) {
-                methodNames += path.basename(files[i].fsPath)[0];
-            }
+    //vscode.workspace.findFiles('**/*.bfp').then(res => UpdateMethodNamesAfterFoundFiles(res))
+    methods = {};
+    for (const file of files) {
+        
+        const filePath = file.fsPath;
+        console.log(path.dirname(filePath), path.basename(filePath)[0]);
+        if (!methods[path.dirname(filePath)]) {
+            methods[path.dirname(filePath)] = [];
+        }
+        methods[path.dirname(filePath)].push({
+            character: path.basename(filePath)[0],
+            parameters: getParameterDetails(filePath),
+            requiredCells: getRequiredCells(filePath),
+            description: getDescription(filePath),
+        });
+        
+    }
+    console.log("\n\n\n");
+}
+function UpdateMethodNamesAfterFoundFiles(files : vscode.Uri[]) {
+    
+}
+function getParameterDetails(path : string) : string[] {
+    return [];
+}
+function getRequiredCells(path : string) : number[] {
+    return [];
+}
+function getDescription(path : string) : string {
+    return "";
+}
+
+function CheckIfMethod(char : string, fileAddress : string) {
+    const methodInfos = methods[path.dirname(fileAddress)];
+    for (const methodInfo of methodInfos) {
+        if (methodInfo.character == char) {
+            console.log("ITS TRUE");
+            return true;
         }
     }
+    return false;
 }
 
 function validateTextDocument(document : vscode.TextDocument, diagnosticCollection : vscode.DiagnosticCollection) {
@@ -128,7 +161,7 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
                 diagnostics.push(diagnostic);
                 continue;
             }
-            if (!isCodeChar(code[j], { debug: true, methods: true, bfp: false}, "(")) {
+            if (!isCodeChar(code[j], { debug: true, methods: true, bfp: false}, "(", document.uri.fsPath)) {
                 const diagnosticRange = new vscode.Range(document.positionAt(j), document.positionAt(j + 1))
                 const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - invalid instruction", vscode.DiagnosticSeverity.Error)
                 diagnostics.push(diagnostic);
@@ -231,19 +264,16 @@ function NumCheck(document : vscode.TextDocument, startIndex : number, endChar :
 
 }
 
-function isCodeChar(char : string, extraChars : {debug : boolean, methods : boolean, bfp : boolean}, miscExtraChars : string) : boolean {
+function isCodeChar(char : string, extraChars : {debug : boolean, methods : boolean, bfp : boolean}, miscExtraChars : string, fileAddress : string) : boolean {
     let codeChars : string = "+-,.<>[]";
     if (extraChars.debug) {
         codeChars += "\\:?\"|"
-    }
-    if (extraChars.methods) {
-        codeChars += methodNames;
     }
     if (extraChars.bfp) {
         codeChars += "{}()*";
     }
     codeChars += miscExtraChars;
-    return codeChars.indexOf(char) > -1
+    return codeChars.indexOf(char) > -1 || (extraChars.methods && CheckIfMethod(char, fileAddress))
 }
 
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
@@ -255,7 +285,7 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
             for (let j = 0; j < line.length; j++) {
                 if (line[j] == "/") {
                     break;
-                } else if (methodNames.includes(line[j])) {
+                } else if (CheckIfMethod(line[j], document.uri.fsPath)) {
                     tokensBuilder.push(i, j, 1, 0);
                 }
                 
@@ -264,6 +294,13 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
         
         return tokensBuilder.build();
     }
+}
+
+class MethodInfo {
+    character : string = "";
+    requiredCells : number[] = [];
+    parameters : string[] = [];
+    description : string = "";
 }
 
 enum NumCheckResult {NonInteger, Empty, MissingEndChar, Valid}
