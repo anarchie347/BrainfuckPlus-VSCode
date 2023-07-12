@@ -60,7 +60,6 @@ async function UpdateMethodNames() {
     for (const file of files) {
         
         const filePath = file.fsPath;
-        console.log(path.dirname(filePath), path.basename(filePath)[0]);
         if (!methods[path.dirname(filePath)]) {
             methods[path.dirname(filePath)] = [];
         }
@@ -72,11 +71,8 @@ async function UpdateMethodNames() {
         });
         
     }
-    console.log("\n\n\n");
 }
-function UpdateMethodNamesAfterFoundFiles(files : vscode.Uri[]) {
-    
-}
+
 function getParameterDetails(path : string) : string[] {
     return [];
 }
@@ -91,7 +87,6 @@ function CheckIfMethod(char : string, fileAddress : string) {
     const methodInfos = methods[path.dirname(fileAddress)];
     for (const methodInfo of methodInfos) {
         if (methodInfo.character == char) {
-            console.log("ITS TRUE");
             return true;
         }
     }
