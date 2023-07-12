@@ -19,8 +19,15 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(deleteFile);
     context.subscriptions.push(renameFile);
 
+    //for method detail updates
+    const changeFile = vscode.workspace.onDidChangeTextDocument(event => {
+        if (path.extname(event.document.uri.fsPath) == ".bfp") {
+            UpdateSingleMethodDetails(event.document);
+        }
+    });
+
     //for method hiighlighting
-    const provider = vscode.languages.registerDocumentSemanticTokensProvider(
+    const tokenProvider = vscode.languages.registerDocumentSemanticTokensProvider(
         {
             language: "bfp",
             scheme: "file"
@@ -28,7 +35,26 @@ export async function activate(context: vscode.ExtensionContext) {
         new MySemanticTokensProvider(),
         new vscode.SemanticTokensLegend(["entity.name.function"])
     );
-    context.subscriptions.push(provider);
+    context.subscriptions.push(tokenProvider);
+
+    //for method info hover text
+    const hoverHandler = {
+        provideHover(document : vscode.TextDocument, position : vscode.Position) : vscode.ProviderResult<vscode.Hover> {
+            const hoverInfo = getHoverInformation(document, position);
+            if (hoverInfo) {
+                return new vscode.Hover(hoverInfo);
+            }
+        }
+    };
+    const hoverProvider = vscode.languages.registerHoverProvider(
+        {
+            scheme: "file",
+            language: "bfp"
+        },
+        hoverHandler
+    );
+    context.subscriptions.push(hoverProvider);
+
 
     //for errors
     const diagnosticCollection = vscode.languages.createDiagnosticCollection("BFPDiagnostics");
@@ -60,28 +86,65 @@ async function UpdateMethodNames() {
     for (const file of files) {
         
         const filePath = file.fsPath;
+        const fileDocument = await vscode.workspace.openTextDocument(file);
         if (!methods[path.dirname(filePath)]) {
             methods[path.dirname(filePath)] = [];
         }
         methods[path.dirname(filePath)].push({
             character: path.basename(filePath)[0],
-            parameters: getParameterDetails(filePath),
-            requiredCells: getRequiredCells(filePath),
-            description: getDescription(filePath),
+            description: getDescription(fileDocument),
+            requiredCells: getRequiredCells(fileDocument),   
+            parameters: getParameterDetails(fileDocument)
         });
         
     }
 }
 
-function getParameterDetails(path : string) : string[] {
-    return [];
+async function UpdateSingleMethodDetails(file : vscode.TextDocument) {
+    const filePath = file.uri.fsPath;
+    const fileDocument = await vscode.workspace.openTextDocument(file.uri);
+    const methodInfos = methods[path.dirname(filePath)]
+    for (let i = 0; i < methodInfos.length; i++) {
+        if (methodInfos[i].character == path.basename(filePath)[0]) {
+            methodInfos[i] = {
+                character: path.basename(filePath)[0],
+                description: getDescription(fileDocument),
+                requiredCells: getRequiredCells(fileDocument),   
+                parameters: getParameterDetails(fileDocument)
+            }
+        }
+    }
 }
-function getRequiredCells(path : string) : number[] {
-    return [];
-}
-function getDescription(path : string) : string {
+
+function getDescription(file : vscode.TextDocument) : string {
+    if (file.lineCount > 0 && file.lineAt(0).text.startsWith("//Description: ")) {
+        return file.lineAt(0).text.substring(15);
+    }
     return "";
 }
+function getRequiredCells(file : vscode.TextDocument) : number[] {
+    if (file.lineCount > 1 && file.lineAt(1).text.startsWith("//Cells: ")) {
+        let valueStr : string = file.lineAt(1).text.substring(9);
+        valueStr.replace(" ","");
+        const cells =  valueStr.split(",").map(str => parseInt(str, 10));
+        if (!cells.find(value => isNaN(value))) {
+            return cells;
+        }
+    }
+    return [];
+}
+function getParameterDetails(file : vscode.TextDocument) : string[] {
+    let i = 2;
+    let details : string[] = [];
+    while (file.lineCount > i && /\/\/Parameter [0-9]+: /.test(file.lineAt(i).text)) {
+        const startIndex = file.lineAt(i).text.indexOf(":") + 2;
+        details.push(file.lineAt(i).text.substring(startIndex));
+        i++;
+    }
+    return details;
+}
+
+
 
 function CheckIfMethod(char : string, fileAddress : string) {
     const methodInfos = methods[path.dirname(fileAddress)];
@@ -271,6 +334,26 @@ function isCodeChar(char : string, extraChars : {debug : boolean, methods : bool
     return codeChars.indexOf(char) > -1 || (extraChars.methods && CheckIfMethod(char, fileAddress))
 }
 
+function getHoverInformation(document : vscode.TextDocument, position : vscode.Position) : vscode.MarkdownString|null {
+    const char = document.getText(new vscode.Range(position, document.positionAt(document.offsetAt(position) + 1)));
+    const filepath = document.uri.fsPath
+    const methodInfos = methods[path.dirname(filepath)];
+    const methodInfo = methodInfos.find(mI => mI.character == char);
+    if (!methodInfo) {
+        return null;
+    }
+    const cellstring = methodInfo.requiredCells.map(num => `[${num}]`).join(", ");
+    const parameterDetails = methodInfo.parameters.map((details, index) => `${index}: ${details}`).join('\n\n')
+    const str = `**${char}**\n
+${methodInfo.description}\n
+**Required Cells:** ${cellstring}\n
+**Parameters:**\n
+${parameterDetails}
+`;
+    console.log(str);
+    return new vscode.MarkdownString(str); //need two spaces at end of lines to indicate newline
+
+}
 class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
         const tokensBuilder = new vscode.SemanticTokensBuilder();
@@ -293,9 +376,9 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
 
 class MethodInfo {
     character : string = "";
+    description : string = "";
     requiredCells : number[] = [];
     parameters : string[] = [];
-    description : string = "";
 }
 
 enum NumCheckResult {NonInteger, Empty, MissingEndChar, Valid}
