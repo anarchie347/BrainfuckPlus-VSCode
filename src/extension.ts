@@ -215,7 +215,7 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
                 diagnostics.push(diagnostic);
                 continue;
             }
-            if (!isCodeChar(code[j], { debug: true, methods: true, bfp: false}, "(", document.uri.fsPath)) {
+            if (!isCodeChar(code[j], { debug: true, methods: true, bfp: false}, "({", document.uri.fsPath)) {
                 const diagnosticRange = new vscode.Range(document.positionAt(j), document.positionAt(j + 1))
                 const diagnostic = new vscode.Diagnostic(diagnosticRange, "Invalid Shorthand repetition - invalid instruction", vscode.DiagnosticSeverity.Error)
                 diagnostics.push(diagnostic);
