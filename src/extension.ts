@@ -343,7 +343,7 @@ function getHoverInformation(document : vscode.TextDocument, position : vscode.P
         return null;
     }
     const cellstring = methodInfo.requiredCells.map(num => `[${num}]`).join(", ");
-    const parameterDetails = methodInfo.parameters.map((details, index) => `${index}: ${details}`).join('\n\n')
+    const parameterDetails = methodInfo.parameters.map((details, index) => `- ${index + 1}: ${details}`).join('\n\n')
     const str = `**${char}**\n
 ${methodInfo.description}\n
 **Required Cells:** ${cellstring}\n
