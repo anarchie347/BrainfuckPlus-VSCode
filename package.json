@@ -2,7 +2,7 @@
   "name": "brainfuckplus",
   "displayName": "BrainfuckPlus",
   "description": "Syntax highlighting for BrainfuckPlus",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.78.0"
   },
