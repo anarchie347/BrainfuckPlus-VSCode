@@ -30,9 +30,14 @@
 				"match": "\\*(1|2|3|4|5|6|7|8|9|0)*"
 			},
 			{
+				"name": "comment.block.bfp",
+				"begin": "/\\*",
+				"end": "\\*/"
+			},
+			{
 				"name": "comment.line.bfp",
 				"match": "/.*$"
-			},
+			},	
 			{
 				"name": "entity.name.section.bfp",
 				"match": "\\((0|1|2|3|4|5|6|7|8|9)*\\)"

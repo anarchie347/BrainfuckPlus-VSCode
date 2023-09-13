@@ -162,11 +162,26 @@ function validateTextDocument(document : vscode.TextDocument, diagnosticCollecti
     let SquarebracketOpenIndexes : number[] = [];
     let SquarebracketCloseIndexes : number[] = [];
 
+    let inBlockComment: boolean = false;
+
     //main loop for each char
     for (let i = 0; i < code.length; i++) {
         j = i;
         //comment
-       if (code[i] == "/") {
+        if (i + 1 < code.length && !inBlockComment && code[i] == "/" && code[i + 1] == "*") {
+            inBlockComment = true;
+            i++;
+            continue;
+        }
+        if (i + 1 < code.length && inBlockComment && code[i] == "*" && code[i+1] == "/") {
+            inBlockComment = false;
+            i++;
+            continue
+        }
+        if (inBlockComment) {
+            continue;
+        }
+        if (code[i] == "/") {
             const nextlinePos = new vscode.Position(document.positionAt(i).line + 1,0)
             i = document.offsetAt(nextlinePos) - 1;
             continue;
@@ -354,12 +369,22 @@ class MySemanticTokensProvider implements vscode.DocumentSemanticTokensProvider 
     provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SemanticTokens> {
         const tokensBuilder = new vscode.SemanticTokensBuilder();
         const text = document.getText();
+        let inBlockComment: boolean = false;
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i).text;          
             for (let j = 0; j < line.length; j++) {
-                if (line[j] == "/") {
+                if (inBlockComment && j + 1 < line.length && line[j] == '*' && line[j + 1] == '/') {
+                    inBlockComment = false;
+                    j++;
+                }
+                if (!inBlockComment && j + 1 < line.length && line[j] == '/' && line[j + 1] == '*') {
+                    inBlockComment = true;
+                    j++;
+                }
+                if (!inBlockComment && line[j] == "/") {
                     break;
-                } else if (CheckIfMethod(line[j], document.uri.fsPath)) {
+                }
+                if (CheckIfMethod(line[j], document.uri.fsPath) && !inBlockComment) {
                     tokensBuilder.push(i, j, 1, 0);
                 }
                 
