@@ -4,7 +4,7 @@ Syntax highlighting and linting for BrainfuckPlus
 
 Currently in development
 
-Will be released on the vscode marketplace once it is finished
+Will be released on the vscode marketplace, currently having issues with this at the moment
 
 BrainfuckPlus: [BrainfuckPlus transpiler](https://github.com/anarchie347/BrainfuckPlus)
 
